@@ -87,7 +87,6 @@ cubes:
         measures:
           - refund_count
           - total_refunded
-          - avg_days_to_refund
           - refunded_order_count
         time_dimension: refund_date_only_pst
         granularity: day

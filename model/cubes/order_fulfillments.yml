@@ -107,7 +107,6 @@ cubes:
         measures:
           - fulfillment_count
           - total_quantity
-          - avg_hours_to_fulfill
           - on_time_count
           - late_count
         time_dimension: fulfillment_date_pst

@@ -117,7 +117,6 @@ cubes:
         measures:
           - customer_count
           - total_ltv
-          - avg_ltv
           - total_orders
         time_dimension: customer_since_pst
         granularity: month
