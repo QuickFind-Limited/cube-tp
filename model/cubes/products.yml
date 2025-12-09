@@ -85,7 +85,7 @@ cubes:
       # STOCK006: In Stock Rate
       - name: in_stock_rate
         type: number
-        sql: "(CAST({product_count} AS FLOAT64) - CAST({out_of_stock_count} AS FLOAT64)) / NULLIF(CAST({product_count} AS FLOAT64), 0) * 100"
+        sql: "(({product_count} * 1.0 - {out_of_stock_count}) / NULLIF({product_count}, 0)) * 100"
         description: "STOCK006 - Percentage of products in stock"
 
       # LIFE001-004: Lifecycle metrics
