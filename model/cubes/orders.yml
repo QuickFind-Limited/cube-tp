@@ -196,7 +196,6 @@ cubes:
           - gross_revenue
           - total_refunded
           - total_discounts
-          - average_order_value
         time_dimension: order_date_pst
         granularity: day
         partition_granularity: month
