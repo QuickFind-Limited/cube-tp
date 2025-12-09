@@ -78,7 +78,7 @@ cubes:
         type: string
 
       - name: order_date_pst
-        sql: order_date_pst
+        sql: CAST(order_date_pst AS TIMESTAMP)
         type: time
         description: "Order date in PST timezone"
 
