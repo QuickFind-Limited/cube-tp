@@ -1,0 +1,122 @@
+cubes:
+  - name: customers
+    sql_table: magical-desktop.shopify.customers_flat_with_pst
+
+    description: Customer master with lifetime value metrics
+
+    joins: []
+
+    dimensions:
+      - name: customer_id
+        sql: customer_id
+        type: string
+        primary_key: true
+
+      - name: email
+        sql: email
+        type: string
+
+      - name: first_name
+        sql: first_name
+        type: string
+
+      - name: last_name
+        sql: last_name
+        type: string
+
+      - name: customer_name
+        sql: customer_name
+        type: string
+
+      - name: created_at_pst
+        sql: created_at_pst
+        type: time
+        description: "Customer creation date in PST"
+
+      - name: customer_since_pst
+        sql: customer_since_pst
+        type: time
+        description: "Customer since date (PST)"
+
+      - name: shipping_country
+        sql: default_address_country
+        type: string
+
+      - name: customer_segment
+        sql: customer_segment
+        type: string
+        description: "Behavioral segment (pre-calculated)"
+
+      - name: value_segment
+        sql: value_segment
+        type: string
+        description: "Value-based segment (pre-calculated)"
+
+      - name: predicted_spend_tier
+        sql: predicted_spend_tier
+        type: string
+        description: "ML-based spend prediction"
+
+      - name: is_email_verified
+        sql: is_email_verified
+        type: boolean
+
+      - name: accepts_marketing
+        sql: accepts_marketing
+        type: boolean
+
+    measures:
+      # CM001: Customer Count
+      - name: customer_count
+        type: count_distinct
+        sql: customer_id
+        description: "CM001 - Total unique customers"
+
+      # CM002: Total Customer LTV
+      - name: total_ltv
+        type: sum
+        sql: total_spent
+        description: "CM002 - Total customer lifetime value (pre-calculated)"
+
+      # CM003: Average Customer LTV
+      - name: avg_ltv
+        type: avg
+        sql: total_spent
+        description: "CM003 - Average customer lifetime value"
+
+      # CM058: Customer AOV (pre-calculated)
+      - name: avg_customer_aov
+        type: avg
+        sql: average_order_value
+        description: "CM058 - Average order value per customer (pre-calculated)"
+
+      # Total orders per customer
+      - name: total_orders
+        type: sum
+        sql: total_orders
+        description: "Total orders (pre-aggregated per customer)"
+
+      - name: avg_orders_per_customer
+        type: number
+        sql: "{total_orders} / NULLIF({customer_count}, 0)"
+        description: "Average orders per customer"
+
+    pre_aggregations:
+      # Pre-agg 3: Customer LTV analysis
+      - name: customer_ltv
+        type: rollup
+        dimensions:
+          - customer_since_pst
+          - customer_segment
+          - value_segment
+          - shipping_country
+        measures:
+          - customer_count
+          - total_ltv
+          - avg_ltv
+          - total_orders
+        time_dimension: customer_since_pst
+        granularity: month
+        partition_granularity: year
+        refresh_key:
+          every: 6 hours

@@ -1,0 +1,117 @@
+cubes:
+  - name: order_fulfillments
+    sql_table: magical-desktop.shopify.order_fulfillments_with_pst
+
+    description: Fulfillment tracking and shipping metrics
+
+    joins:
+      - name: orders
+        sql: "{CUBE}.order_id = {orders}.order_id"
+        relationship: many_to_one
+
+    dimensions:
+      - name: fulfillment_id
+        sql: fulfillment_id
+        type: string
+        primary_key: true
+
+      - name: order_id
+        sql: order_id
+        type: string
+
+      - name: order_number
+        sql: order_number
+        type: string
+
+      - name: fulfilled_at_pst
+        sql: fulfilled_at_pst
+        type: time
+        description: "Fulfillment timestamp in PST"
+
+      - name: fulfillment_date_pst
+        sql: fulfillment_date_pst
+        type: time
+        description: "Fulfillment date in PST"
+
+      - name: fulfillment_status
+        sql: fulfillment_status
+        type: string
+
+      - name: display_status
+        sql: display_status
+        type: string
+
+      - name: hours_to_fulfill
+        sql: hours_to_fulfill
+        type: number
+        description: "Hours between order and fulfillment (pre-calculated)"
+
+      - name: tracking_company
+        sql: tracking_company
+        type: string
+
+      - name: tracking_number
+        sql: tracking_number
+        type: string
+
+    measures:
+      # FM001: Fulfillment Count
+      - name: fulfillment_count
+        type: count_distinct
+        sql: fulfillment_id
+        description: "FM001 - Total fulfillments"
+
+      # FM003: Average Hours to Fulfill
+      - name: avg_hours_to_fulfill
+        type: avg
+        sql: hours_to_fulfill
+        description: "FM003 - Average fulfillment time in hours"
+
+      # FD001: Total Quantity Fulfilled
+      - name: total_quantity
+        type: sum
+        sql: total_quantity
+        description: "FD001 - Total units fulfilled"
+
+      # FD002: On-Time Fulfillment Rate (24 hour SLA)
+      - name: on_time_count
+        type: count
+        sql: CASE WHEN hours_to_fulfill <= 24 THEN fulfillment_id END
+        description: "FD002 - Count of on-time fulfillments (<=24hrs)"
+
+      - name: on_time_rate
+        type: number
+        sql: "({on_time_count} / NULLIF({fulfillment_count}, 0)) * 100"
+        description: "FD002 - On-time fulfillment rate percentage"
+
+      # FD003: Late Fulfillment Count
+      - name: late_count
+        type: count
+        sql: CASE WHEN hours_to_fulfill > 24 THEN fulfillment_id END
+        description: "FD003 - Count of late fulfillments (>24hrs)"
+
+      # Order count
+      - name: fulfilled_order_count
+        type: count_distinct
+        sql: order_id
+        description: "Count of fulfilled orders"
+
+    pre_aggregations:
+      # Pre-agg 7: Fulfillment performance
+      - name: fulfillments_daily
+        type: rollup
+        dimensions:
+          - fulfillment_date_pst
+          - fulfillment_status
+          - tracking_company
+        measures:
+          - fulfillment_count
+          - total_quantity
+          - avg_hours_to_fulfill
+          - on_time_count
+          - late_count
+        time_dimension: fulfillment_date_pst
+        granularity: day
+        partition_granularity: month
+        refresh_key:
+          every: 1 hour

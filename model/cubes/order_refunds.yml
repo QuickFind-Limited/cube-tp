@@ -1,0 +1,96 @@
+cubes:
+  - name: order_refunds
+    sql_table: magical-desktop.shopify.order_refunds_with_pst
+
+    description: Refund transactions and return metrics
+
+    joins:
+      - name: orders
+        sql: "{CUBE}.order_id = {orders}.order_id"
+        relationship: many_to_one
+
+    dimensions:
+      - name: refund_id
+        sql: refund_id
+        type: string
+        primary_key: true
+
+      - name: order_id
+        sql: order_id
+        type: string
+
+      - name: order_number
+        sql: order_number
+        type: string
+
+      - name: refund_date_pst
+        sql: refund_date_pst
+        type: time
+        description: "Refund date in PST"
+
+      - name: refund_date_only_pst
+        sql: refund_date_only_pst
+        type: time
+        description: "Refund date (date part) in PST"
+
+      - name: days_to_refund
+        sql: days_to_refund
+        type: number
+        description: "Days between order and refund (pre-calculated)"
+
+      - name: refund_percentage
+        sql: refund_percentage
+        type: number
+        description: "Refund as % of order total (pre-calculated)"
+
+      - name: currency
+        sql: currency
+        type: string
+
+    measures:
+      # RET001: Refund Count
+      - name: refund_count
+        type: count_distinct
+        sql: refund_id
+        description: "RET001 - Total refunds"
+
+      # RET003: Total Refunded Amount
+      - name: total_refunded
+        type: sum
+        sql: total_refunded
+        description: "RET003 - Total refunded amount"
+
+      # RET005: Average Days to Refund
+      - name: avg_days_to_refund
+        type: avg
+        sql: days_to_refund
+        description: "RET005 - Average days from order to refund"
+
+      # Refund rate
+      - name: avg_refund_percentage
+        type: avg
+        sql: refund_percentage
+        description: "Average refund as % of order value"
+
+      # Order count (distinct orders with refunds)
+      - name: refunded_order_count
+        type: count_distinct
+        sql: order_id
+        description: "Count of orders with refunds"
+
+    pre_aggregations:
+      # Pre-agg 6: Refund analysis
+      - name: refunds_daily
+        type: rollup
+        dimensions:
+          - refund_date_only_pst
+        measures:
+          - refund_count
+          - total_refunded
+          - avg_days_to_refund
+          - refunded_order_count
+        time_dimension: refund_date_only_pst
+        granularity: day
+        partition_granularity: month
+        refresh_key:
+          every: 1 hour

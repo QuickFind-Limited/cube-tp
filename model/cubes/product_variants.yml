@@ -1,0 +1,113 @@
+cubes:
+  - name: product_variants
+    sql_table: magical-desktop.shopify.product_variants_with_pst
+
+    description: Product variant (SKU) level details
+
+    joins:
+      - name: products
+        sql: "{CUBE}.product_id = {products}.product_id"
+        relationship: many_to_one
+
+    dimensions:
+      - name: variant_id
+        sql: variant_id
+        type: string
+        primary_key: true
+
+      - name: product_id
+        sql: product_id
+        type: string
+
+      - name: inventory_item_id
+        sql: inventory_item_id
+        type: string
+
+      - name: sku
+        sql: sku
+        type: string
+
+      - name: variant_title
+        sql: variant_title
+        type: string
+
+      - name: option1
+        sql: option1
+        type: string
+
+      - name: option2
+        sql: option2
+        type: string
+
+      - name: option3
+        sql: option3
+        type: string
+
+      - name: created_at_pst
+        sql: created_at_pst
+        type: time
+
+      - name: updated_at_pst
+        sql: updated_at_pst
+        type: time
+
+      - name: price
+        sql: price
+        type: number
+
+      - name: compare_at_price
+        sql: compare_at_price
+        type: number
+
+      - name: is_on_sale
+        sql: is_on_sale
+        type: boolean
+
+      - name: requires_shipping
+        sql: requires_shipping
+        type: boolean
+
+      - name: taxable
+        sql: taxable
+        type: boolean
+
+    measures:
+      # Variant count
+      - name: variant_count
+        type: count_distinct
+        sql: variant_id
+        description: "Total unique variants (SKUs)"
+
+      # Average price
+      - name: avg_price
+        type: avg
+        sql: price
+        description: "Average variant price"
+
+      # Discount metrics
+      - name: discount_amount
+        type: sum
+        sql: discount_amount
+        description: "Total discount on variants"
+
+      - name: avg_discount_percentage
+        type: avg
+        sql: discount_percentage
+        description: "Average discount percentage"
+
+      # On sale count
+      - name: on_sale_count
+        type: count
+        sql: CASE WHEN is_on_sale THEN variant_id END
+        description: "Count of variants on sale"
+
+      - name: sale_rate
+        type: number
+        sql: "({on_sale_count} / NULLIF({variant_count}, 0)) * 100"
+        description: "Percentage of variants on sale"
+
+      # STR001: Sell-Through Rate (requires sales data from order_line_items)
+      - name: total_inventory
+        type: sum
+        sql: inventory_quantity
+        description: "Total inventory across variants"

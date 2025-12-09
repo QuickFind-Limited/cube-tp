@@ -1,37 +1,204 @@
 cubes:
   - name: orders
-    sql: >
-      select 1 as id, 100 as amount, 'new' status
-      UNION ALL
-      select 2 as id, 200 as amount, 'new' status
-      UNION ALL
-      select 3 as id, 300 as amount, 'processed' status
-      UNION ALL
-      select 4 as id, 500 as amount, 'processed' status
-      UNION ALL
-      select 5 as id, 600 as amount, 'shipped' status
+    sql_table: magical-desktop.shopify.orders_flat_with_pst
+
+    description: Order header metrics - one row per order
 
     joins: []
 
     dimensions:
-      - name: id
-        sql: id
-        type: number
+      - name: order_id
+        sql: order_id
+        type: string
         primary_key: true
 
-      - name: status
-        sql: status
+      - name: order_number
+        sql: order_number
         type: string
 
-    measures:
-      - name: count
-        type: count
+      - name: created_at_pst
+        sql: created_at_pst
+        type: time
+        description: "Order creation timestamp in PST"
 
-      - name: amount
-        sql: amount
+      - name: order_date_pst
+        sql: order_date_pst
+        type: time
+        description: "Order date in PST timezone"
+
+      - name: order_month_pst
+        sql: order_month_pst
+        type: string
+        description: "Order month in YYYY-MM format (PST)"
+
+      - name: order_year
+        sql: order_year
+        type: number
+
+      - name: order_month
+        sql: order_month
+        type: number
+
+      - name: order_quarter
+        sql: order_quarter
+        type: number
+
+      - name: financial_status
+        sql: financial_status
+        type: string
+
+      - name: fulfillment_status
+        sql: fulfillment_status
+        type: string
+
+      - name: return_status
+        sql: return_status
+        type: string
+
+      - name: shipping_country
+        sql: shipping_country
+        type: string
+
+      - name: shipping_province
+        sql: shipping_province
+        type: string
+
+      - name: billing_country
+        sql: billing_country
+        type: string
+
+      - name: customer_id
+        sql: customer_id
+        type: string
+
+      - name: email
+        sql: email
+        type: string
+
+      - name: customer_order_index
+        sql: customer_order_index
+        type: number
+        description: "1st, 2nd, 3rd order sequence for cohort analysis"
+
+      - name: is_first_order
+        sql: "customer_order_index = 1"
+        type: boolean
+
+      - name: is_paid
+        sql: is_paid
+        type: boolean
+
+      - name: is_fulfilled
+        sql: is_fulfilled
+        type: boolean
+
+      - name: cancelled
+        sql: cancelled
+        type: boolean
+
+      - name: test
+        sql: test
+        type: boolean
+
+    measures:
+      # RM001: Total Revenue
+      - name: total_revenue
         type: sum
+        sql: net_revenue
+        description: "RM001 - Total revenue net of refunds (pre-calculated in BigQuery)"
+
+      # RM002: Gross Revenue
+      - name: gross_revenue
+        type: sum
+        sql: total_price
+        description: "RM002 - Gross revenue before refunds"
+
+      # OM001: Order Count
+      - name: order_count
+        type: count_distinct
+        sql: order_id
+        description: "OM001 - Total number of orders"
+
+      # OM003: Average Order Value
+      - name: average_order_value
+        type: number
+        sql: "{total_revenue} / NULLIF({order_count}, 0)"
+        description: "OM003 - Average order value (revenue per order)"
+
+      # RM003: Total Refunded
+      - name: total_refunded
+        type: sum
+        sql: total_refunded
+        description: "RM003 - Total refunded amount (pre-calculated)"
+
+      # DM001: Total Discounts
+      - name: total_discounts
+        type: sum
+        sql: total_discounts
+        description: "DM001 - Total discount amount"
+
+      # DM002: Average Discount Percentage
+      - name: avg_discount_percentage
+        type: avg
+        sql: discount_percentage
+        description: "DM002 - Average discount rate (pre-calculated)"
+
+      # CH001: Channel Performance - First Visit Source
+      - name: order_count_by_source
+        type: count_distinct
+        sql: order_id
+        description: "CH001 - Orders by marketing channel"
+
+      # Refund metrics
+      - name: refund_count
+        type: sum
+        sql: refund_count
+        description: "Count of refunds (pre-aggregated)"
+
+      - name: refund_rate
+        type: number
+        sql: "{refund_count} / NULLIF({order_count}, 0)"
+        description: "RET001 - Refund rate (refunds per order)"
+
+      # Tax and shipping
+      - name: total_tax
+        type: sum
+        sql: total_tax
+
+      - name: total_shipping
+        type: sum
+        sql: total_shipping
+
+      # Fulfillment
+      - name: fulfillment_count
+        type: sum
+        sql: fulfillment_count
+        description: "Total fulfillments (pre-aggregated)"
+
+      # Transaction metrics
+      - name: transaction_count
+        type: sum
+        sql: transaction_count
+        description: "Total payment transactions (pre-aggregated)"
 
     pre_aggregations:
-      # Pre-aggregation definitions go here.
-      # Learn more in the documentation: https://cube.dev/docs/caching/pre-aggregations/getting-started
-
+      # Pre-agg 1: Daily orders summary
+      - name: orders_daily
+        type: rollup
+        dimensions:
+          - order_date_pst
+          - financial_status
+          - fulfillment_status
+          - shipping_country
+        measures:
+          - order_count
+          - total_revenue
+          - gross_revenue
+          - total_refunded
+          - total_discounts
+          - average_order_value
+        time_dimension: order_date_pst
+        granularity: day
+        partition_granularity: month
+        refresh_key:
+          every: 1 hour

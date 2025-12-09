@@ -1,0 +1,218 @@
+cubes:
+  - name: order_line_items
+    sql: >
+      SELECT
+        li.*,
+        o.order_date_pst,
+        o.order_month_pst,
+        o.order_year,
+        o.order_month,
+        o.customer_id,
+        o.shipping_country,
+        o.shipping_province,
+        o.financial_status,
+        o.fulfillment_status
+      FROM `magical-desktop.shopify.order_line_items_with_pst` li
+      LEFT JOIN `magical-desktop.shopify.orders_flat_with_pst` o
+        ON li.order_id = o.order_id
+
+    description: Main fact table for revenue and product analysis - one row per line item
+
+    joins:
+      - name: products
+        sql: "{CUBE}.product_id = {products}.product_id"
+        relationship: many_to_one
+
+      - name: orders
+        sql: "{CUBE}.order_id = {orders}.order_id"
+        relationship: many_to_one
+
+    dimensions:
+      - name: line_item_id
+        sql: line_item_id
+        type: string
+        primary_key: true
+
+      - name: order_id
+        sql: order_id
+        type: string
+
+      - name: product_id
+        sql: product_id
+        type: string
+
+      - name: variant_id
+        sql: variant_id
+        type: string
+
+      - name: sku
+        sql: sku
+        type: string
+
+      - name: product_title
+        sql: product_title
+        type: string
+
+      - name: variant_title
+        sql: variant_title
+        type: string
+
+      - name: vendor
+        sql: vendor
+        type: string
+
+      - name: order_date_pst
+        sql: order_date_pst
+        type: time
+        description: "Order date in PST timezone"
+
+      - name: order_month_pst
+        sql: order_month_pst
+        type: string
+
+      - name: order_year
+        sql: order_year
+        type: number
+
+      - name: order_month
+        sql: order_month
+        type: number
+
+      - name: shipping_country
+        sql: shipping_country
+        type: string
+
+      - name: shipping_province
+        sql: shipping_province
+        type: string
+
+      - name: financial_status
+        sql: financial_status
+        type: string
+
+      - name: fulfillment_status
+        sql: fulfillment_status
+        type: string
+
+      - name: is_gift_card
+        sql: COALESCE(is_gift_card, false)
+        type: boolean
+        description: "Filter is_gift_card=false for product-only revenue"
+
+      - name: fulfillable
+        sql: fulfillable
+        type: boolean
+
+      - name: requires_shipping
+        sql: requires_shipping
+        type: boolean
+
+    measures:
+      # RM003: Line-level revenue
+      - name: total_revenue
+        type: sum
+        sql: line_total
+        description: "RM003 - Total line item revenue"
+
+      # PM001: Units Sold
+      - name: units_sold
+        type: sum
+        sql: quantity
+        description: "PM001 - Total units sold"
+
+      # BASK001: Line Count
+      - name: line_count
+        type: count
+        sql: line_item_id
+        description: "BASK001 - Total line items"
+
+      # OM002: Order Count (approximate via count_distinct_approx)
+      - name: order_count
+        type: count_distinct_approx
+        sql: order_id
+        description: "OM002 - Approximate order count for performance"
+
+      # BASK002: Basket Size
+      - name: basket_size
+        type: number
+        sql: "{line_count} / NULLIF({order_count}, 0)"
+        description: "BASK002 - Average items per order"
+
+      # BASK003: Average Order Value
+      - name: average_order_value
+        type: number
+        sql: "{total_revenue} / NULLIF({order_count}, 0)"
+        description: "BASK003 - AOV from line items"
+
+      # DM058: Discount Amount
+      - name: discount_amount
+        type: sum
+        sql: line_discount_amount
+        description: "DM058 - Total discount amount"
+
+      # Original revenue before discounts
+      - name: original_revenue
+        type: sum
+        sql: original_line_total
+        description: "Revenue before discounts"
+
+      # PM003: Average Unit Price
+      - name: avg_unit_price
+        type: avg
+        sql: discounted_unit_price
+        description: "PM003 - Average selling price per unit"
+
+      # MM001: Margin (requires cost data if available)
+      - name: total_cost
+        type: sum
+        sql: COALESCE(cost, 0)
+        description: "Total product cost"
+
+      - name: gross_margin
+        type: number
+        sql: "{total_revenue} - {total_cost}"
+        description: "MM001 - Gross margin dollars"
+
+      - name: margin_percentage
+        type: number
+        sql: "CASE WHEN {total_revenue} > 0 THEN ({total_revenue} - {total_cost}) / {total_revenue} * 100 ELSE 0 END"
+        description: "Gross margin percentage"
+
+    pre_aggregations:
+      # Pre-agg 2: Product performance rollup
+      - name: product_daily
+        type: rollup
+        dimensions:
+          - order_date_pst
+          - product_id
+          - product_title
+          - vendor
+          - shipping_country
+        measures:
+          - units_sold
+          - total_revenue
+          - line_count
+          - order_count
+          - discount_amount
+        time_dimension: order_date_pst
+        granularity: day
+        partition_granularity: month
+        refresh_key:
+          every: 1 hour
+
+      # Pre-agg 8: Transaction-grain for exact counting
+      - name: order_grain_exact
+        type: original
+        dimensions:
+          - order_id
+          - order_date_pst
+          - shipping_country
+          - financial_status
+        measures:
+          - total_revenue
+          - line_count
+        time_dimension: order_date_pst
+        granularity: day
+        partition_granularity: month
+        refresh_key:
+          every: 1 hour

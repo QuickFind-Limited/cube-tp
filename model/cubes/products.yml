@@ -1,0 +1,127 @@
+cubes:
+  - name: products
+    sql_table: magical-desktop.shopify.products_flat_with_pst
+
+    description: Product master with inventory and lifecycle metrics
+
+    joins: []
+
+    dimensions:
+      - name: product_id
+        sql: product_id
+        type: string
+        primary_key: true
+
+      - name: product_title
+        sql: product_title
+        type: string
+
+      - name: product_type
+        sql: product_type
+        type: string
+
+      - name: vendor
+        sql: vendor
+        type: string
+
+      - name: status
+        sql: status
+        type: string
+
+      - name: created_at_pst
+        sql: created_at_pst
+        type: time
+
+      - name: published_at_pst
+        sql: published_at_pst
+        type: time
+
+      - name: product_age_days
+        sql: product_age_days
+        type: number
+        description: "Days since product created (pre-calculated)"
+
+      - name: is_out_of_stock
+        sql: is_out_of_stock
+        type: boolean
+
+      - name: is_low_stock
+        sql: is_low_stock
+        type: boolean
+
+      - name: has_variants
+        sql: has_variants
+        type: boolean
+
+      - name: is_published
+        sql: is_published
+        type: boolean
+
+    measures:
+      # PM001: Product Count
+      - name: product_count
+        type: count_distinct
+        sql: product_id
+        description: "PM001 - Total unique products"
+
+      # INV002: Total Inventory
+      - name: total_inventory
+        type: sum
+        sql: total_inventory
+        description: "INV002 - Total inventory units (pre-aggregated across variants)"
+
+      # STOCK001: Out of Stock Count
+      - name: out_of_stock_count
+        type: count
+        sql: CASE WHEN is_out_of_stock THEN product_id END
+        description: "STOCK001 - Count of out-of-stock products"
+
+      # STOCK005: Low Stock Count
+      - name: low_stock_count
+        type: count
+        sql: CASE WHEN is_low_stock THEN product_id END
+        description: "STOCK005 - Count of low-stock products"
+
+      # STOCK006: In Stock Rate
+      - name: in_stock_rate
+        type: number
+        sql: "(({product_count} - {out_of_stock_count}) / NULLIF({product_count}, 0)) * 100"
+        description: "STOCK006 - Percentage of products in stock"
+
+      # LIFE001-004: Lifecycle metrics
+      - name: avg_product_age_days
+        type: avg
+        sql: product_age_days
+        description: "LIFE001 - Average product age in days"
+
+      - name: new_products
+        type: count
+        sql: CASE WHEN product_age_days <= 30 THEN product_id END
+        description: "LIFE002 - Products created in last 30 days"
+
+      - name: published_count
+        type: count
+        sql: CASE WHEN is_published THEN product_id END
+        description: "LIFE003 - Count of published products"
+
+      - name: unpublished_count
+        type: count
+        sql: CASE WHEN NOT is_published THEN product_id END
+        description: "LIFE004 - Count of unpublished products"
+
+    pre_aggregations:
+      # Pre-agg 4: Product performance
+      - name: product_summary
+        type: rollup
+        dimensions:
+          - product_type
+          - vendor
+          - status
+        measures:
+          - product_count
+          - total_inventory
+          - out_of_stock_count
+          - low_stock_count
+          - published_count
+        refresh_key:
+          every: 2 hours

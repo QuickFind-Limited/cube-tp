@@ -1,0 +1,77 @@
+cubes:
+  - name: order_discount_applications
+    sql_table: magical-desktop.shopify.order_discount_applications_with_pst
+
+    description: Discount code usage and promotion effectiveness
+
+    joins:
+      - name: orders
+        sql: "{CUBE}.order_id = {orders}.order_id"
+        relationship: many_to_one
+
+    dimensions:
+      - name: discount_id
+        sql: CONCAT(order_id, '_', discount_code)
+        type: string
+        primary_key: true
+
+      - name: order_id
+        sql: order_id
+        type: string
+
+      - name: discount_code
+        sql: discount_code
+        type: string
+
+      - name: discount_type
+        sql: discount_type
+        type: string
+
+      - name: value_type
+        sql: value_type
+        type: string
+        description: "percentage or fixed_amount"
+
+      - name: allocation_method
+        sql: allocation_method
+        type: string
+
+      - name: target_type
+        sql: target_type
+        type: string
+        description: "line_item, shipping, or order"
+
+      - name: target_selection
+        sql: target_selection
+        type: string
+
+    measures:
+      # DM001: Total Discount Amount
+      - name: total_discount_amount
+        type: sum
+        sql: discount_amount
+        description: "DM001 - Total discount value"
+
+      # DM058: Discount Application Count
+      - name: discount_application_count
+        type: count
+        sql: order_id
+        description: "DM058 - Count of discount applications"
+
+      # Unique codes used
+      - name: unique_codes_count
+        type: count_distinct
+        sql: discount_code
+        description: "Count of unique discount codes used"
+
+      # Orders with discounts
+      - name: discounted_order_count
+        type: count_distinct
+        sql: order_id
+        description: "Count of orders with discounts applied"
+
+      # Average discount per application
+      - name: avg_discount_amount
+        type: avg
+        sql: discount_amount
+        description: "Average discount value per application"

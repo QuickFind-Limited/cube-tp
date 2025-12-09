@@ -1,0 +1,122 @@
+cubes:
+  - name: inventory_levels
+    sql_table: magical-desktop.shopify.inventory_levels_with_pst
+
+    description: Inventory stock levels by location and variant
+
+    joins:
+      - name: product_variants
+        sql: "{CUBE}.inventory_item_id = {product_variants}.inventory_item_id"
+        relationship: many_to_one
+
+    dimensions:
+      - name: inventory_level_id
+        sql: CONCAT(inventory_item_id, '_', location_id)
+        type: string
+        primary_key: true
+
+      - name: inventory_item_id
+        sql: inventory_item_id
+        type: string
+
+      - name: location_id
+        sql: location_id
+        type: string
+
+      - name: location_name
+        sql: location_name
+        type: string
+
+      - name: updated_at_pst
+        sql: updated_at_pst
+        type: time
+
+      - name: in_stock
+        sql: in_stock
+        type: boolean
+
+      - name: out_of_stock
+        sql: out_of_stock
+        type: boolean
+
+      - name: low_stock
+        sql: low_stock
+        type: boolean
+
+      - name: has_incoming
+        sql: has_incoming
+        type: boolean
+
+    measures:
+      # INV001: Available Quantity
+      - name: qty_available
+        type: sum
+        sql: qty_available
+        description: "INV001 - Available to sell"
+
+      # INV002: On Hand Quantity
+      - name: qty_on_hand
+        type: sum
+        sql: qty_on_hand
+        description: "INV002 - Physical on hand"
+
+      # INV003: Committed Quantity
+      - name: qty_committed
+        type: sum
+        sql: qty_committed
+        description: "INV003 - Reserved for orders"
+
+      # STOCK001: Location Count
+      - name: location_count
+        type: count_distinct
+        sql: location_id
+        description: "Count of distinct locations"
+
+      # Stock status counts
+      - name: in_stock_count
+        type: count
+        sql: CASE WHEN in_stock THEN inventory_item_id END
+        description: "Count of items in stock"
+
+      - name: out_of_stock_count
+        type: count
+        sql: CASE WHEN out_of_stock THEN inventory_item_id END
+        description: "Count of items out of stock"
+
+      - name: low_stock_count
+        type: count
+        sql: CASE WHEN low_stock THEN inventory_item_id END
+        description: "Count of items with low stock"
+
+      # Reserved and incoming
+      - name: qty_reserved
+        type: sum
+        sql: qty_reserved
+        description: "Held stock"
+
+      - name: qty_incoming
+        type: sum
+        sql: qty_incoming
+        description: "Inbound stock"
+
+      - name: qty_damaged
+        type: sum
+        sql: qty_damaged
+        description: "Damaged stock"
+
+    pre_aggregations:
+      # Pre-agg 5: Inventory snapshot
+      - name: inventory_snapshot
+        type: rollup
+        dimensions:
+          - location_id
+          - location_name
+        measures:
+          - qty_available
+          - qty_on_hand
+          - qty_committed
+          - qty_incoming
+          - in_stock_count
+          - out_of_stock_count
+        refresh_key:
+          every: 30 minutes
