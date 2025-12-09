@@ -46,8 +46,8 @@ cubes:
         type: number
         description: "Hours between order and fulfillment (pre-calculated)"
 
-      - name: tracking_company
-        sql: tracking_company
+      - name: carrier
+        sql: carrier
         type: string
 
       - name: tracking_number
@@ -103,7 +103,7 @@ cubes:
         dimensions:
           - fulfillment_date_pst
           - fulfillment_status
-          - tracking_company
+          - carrier
         measures:
           - fulfillment_count
           - total_quantity

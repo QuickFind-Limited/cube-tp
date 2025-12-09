@@ -10,8 +10,8 @@ cubes:
         relationship: many_to_one
 
     dimensions:
-      - name: discount_id
-        sql: CONCAT(order_id, '_', discount_code)
+      - name: line_item_id
+        sql: line_item_id
         type: string
         primary_key: true
 
@@ -19,50 +19,40 @@ cubes:
         sql: order_id
         type: string
 
-      - name: discount_code
-        sql: discount_code
+      - name: product_id
+        sql: product_id
         type: string
 
-      - name: discount_type
-        sql: discount_type
+      - name: product_title
+        sql: product_title
         type: string
 
-      - name: value_type
-        sql: value_type
-        type: string
-        description: "percentage or fixed_amount"
-
-      - name: allocation_method
-        sql: allocation_method
+      - name: sku
+        sql: sku
         type: string
 
-      - name: target_type
-        sql: target_type
-        type: string
-        description: "line_item, shipping, or order"
-
-      - name: target_selection
-        sql: target_selection
-        type: string
+      - name: quantity
+        sql: quantity
+        type: number
 
     measures:
       # DM001: Total Discount Amount
       - name: total_discount_amount
         type: sum
-        sql: discount_amount
+        sql: total_discount_amount
         description: "DM001 - Total discount value"
 
-      # DM058: Discount Application Count
-      - name: discount_application_count
-        type: count
-        sql: order_id
-        description: "DM058 - Count of discount applications"
+      # Unit level discount
+      - name: unit_discount_total
+        type: sum
+        sql: unit_discount_amount
+        description: "Total unit-level discounts"
 
-      # Unique codes used
-      - name: unique_codes_count
-        type: count_distinct
-        sql: discount_code
-        description: "Count of unique discount codes used"
+      # Line item count
+      - name: line_count
+        type: count
+        sql: line_item_id
+        description: "Count of discounted line items"
 
       # Orders with discounts
       - name: discounted_order_count
@@ -70,8 +60,8 @@ cubes:
         sql: order_id
         description: "Count of orders with discounts applied"
 
-      # Average discount per application
-      - name: avg_discount_amount
+      # Average discount percentage
+      - name: avg_discount_percentage
         type: avg
-        sql: discount_amount
-        description: "Average discount value per application"
+        sql: discount_percentage
+        description: "Average discount percentage"

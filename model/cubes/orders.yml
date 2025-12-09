@@ -92,8 +92,8 @@ cubes:
         sql: is_fulfilled
         type: boolean
 
-      - name: cancelled
-        sql: cancelled
+      - name: is_cancelled
+        sql: is_cancelled
         type: boolean
 
       - name: test

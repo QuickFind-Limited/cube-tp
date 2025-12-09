@@ -24,8 +24,12 @@ cubes:
         sql: last_name
         type: string
 
-      - name: customer_name
-        sql: customer_name
+      - name: display_name
+        sql: display_name
+        type: string
+
+      - name: full_name
+        sql: full_name
         type: string
 
       - name: created_at_pst
@@ -34,12 +38,12 @@ cubes:
         description: "Customer creation date in PST"
 
       - name: customer_since_pst
-        sql: customer_since_pst
+        sql: CAST(customer_since_pst AS TIMESTAMP)
         type: time
         description: "Customer since date (PST)"
 
-      - name: shipping_country
-        sql: default_address_country
+      - name: default_country
+        sql: default_country
         type: string
 
       - name: customer_segment
@@ -57,12 +61,12 @@ cubes:
         type: string
         description: "ML-based spend prediction"
 
-      - name: is_email_verified
-        sql: is_email_verified
+      - name: verified_email
+        sql: verified_email
         type: boolean
 
-      - name: accepts_marketing
-        sql: accepts_marketing
+      - name: email_subscribed
+        sql: email_subscribed
         type: boolean
 
     measures:
@@ -109,7 +113,7 @@ cubes:
           - customer_since_pst
           - customer_segment
           - value_segment
-          - shipping_country
+          - default_country
         measures:
           - customer_count
           - total_ltv

@@ -13,7 +13,7 @@ cubes:
         primary_key: true
 
       - name: product_title
-        sql: product_title
+        sql: title
         type: string
 
       - name: product_type
@@ -49,8 +49,8 @@ cubes:
         sql: is_low_stock
         type: boolean
 
-      - name: has_variants
-        sql: has_variants
+      - name: has_only_default_variant
+        sql: has_only_default_variant
         type: boolean
 
       - name: is_active
