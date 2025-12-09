@@ -202,17 +202,17 @@ cubes:
 
       # Pre-agg 8: Transaction-grain for exact counting
       - name: order_grain_exact
-        type: originalSql
-        sql: >
-          SELECT
-            order_id,
-            order_date_pst,
-            shipping_country,
-            financial_status,
-            SUM(line_total) as total_revenue,
-            COUNT(line_item_id) as line_count
-          FROM ${CUBE}
-          GROUP BY 1, 2, 3, 4
+        type: rollup
+        dimensions:
+          - order_id
+          - order_date_pst
+          - shipping_country
+          - financial_status
+        measures:
+          - total_revenue
+          - line_count
+        time_dimension: order_date_pst
+        granularity: day
         partition_granularity: month
         refresh_key:
           every: 1 hour
