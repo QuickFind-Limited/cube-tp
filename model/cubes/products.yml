@@ -53,8 +53,8 @@ cubes:
         sql: has_variants
         type: boolean
 
-      - name: is_published
-        sql: is_published
+      - name: is_active
+        sql: is_active
         type: boolean
 
     measures:
@@ -99,15 +99,15 @@ cubes:
         sql: CASE WHEN product_age_days <= 30 THEN product_id END
         description: "LIFE002 - Products created in last 30 days"
 
-      - name: published_count
+      - name: active_count
         type: count
-        sql: CASE WHEN is_published THEN product_id END
-        description: "LIFE003 - Count of published products"
+        sql: CASE WHEN is_active THEN product_id END
+        description: "LIFE003 - Count of active products"
 
-      - name: unpublished_count
+      - name: inactive_count
         type: count
-        sql: CASE WHEN NOT is_published THEN product_id END
-        description: "LIFE004 - Count of unpublished products"
+        sql: CASE WHEN NOT is_active THEN product_id END
+        description: "LIFE004 - Count of inactive products"
 
     pre_aggregations:
       # Pre-agg 4: Product performance
@@ -122,6 +122,6 @@ cubes:
           - total_inventory
           - out_of_stock_count
           - low_stock_count
-          - published_count
+          - active_count
         refresh_key:
           every: 2 hours
