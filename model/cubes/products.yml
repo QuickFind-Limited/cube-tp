@@ -60,9 +60,9 @@ cubes:
     measures:
       # PM001: Product Count
       - name: product_count
-        type: count_distinct
+        type: count_distinct_approx
         sql: product_id
-        description: "PM001 - Total unique products"
+        description: "PM001 - Total unique products (HyperLogLog ~2% accuracy)"
 
       # INV002: Total Inventory
       - name: total_inventory
@@ -110,15 +110,15 @@ cubes:
         description: "LIFE004 - Count of inactive products"
 
     pre_aggregations:
-      # Pre-agg 4: Product grain (one row per product for exact counts)
+      # Pre-agg 4: Product performance (uses count_distinct_approx for product_count)
       - name: product_summary
         type: rollup
         dimensions:
-          - product_id
           - product_type
           - vendor
           - status
         measures:
+          - product_count
           - total_inventory
           - out_of_stock_count
           - low_stock_count

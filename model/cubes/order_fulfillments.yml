@@ -57,9 +57,9 @@ cubes:
     measures:
       # FM001: Fulfillment Count
       - name: fulfillment_count
-        type: count_distinct
+        type: count_distinct_approx
         sql: fulfillment_id
-        description: "FM001 - Total fulfillments"
+        description: "FM001 - Total fulfillments (HyperLogLog ~2% accuracy)"
 
       # FM003: Average Hours to Fulfill
       - name: avg_hours_to_fulfill
@@ -92,20 +92,20 @@ cubes:
 
       # Order count
       - name: fulfilled_order_count
-        type: count_distinct
+        type: count_distinct_approx
         sql: order_id
         description: "Count of fulfilled orders"
 
     pre_aggregations:
-      # Pre-agg 7: Fulfillment grain (one row per fulfillment for exact counts)
-      - name: fulfillments_by_fulfillment
+      # Pre-agg 7: Fulfillment performance (uses count_distinct_approx for fulfillment_count)
+      - name: fulfillments_daily
         type: rollup
         dimensions:
-          - fulfillment_id
           - fulfillment_date_pst
           - fulfillment_status
           - carrier
         measures:
+          - fulfillment_count
           - total_quantity
           - avg_hours_to_fulfill
           - on_time_count

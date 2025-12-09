@@ -72,9 +72,9 @@ cubes:
     measures:
       # CM001: Customer Count
       - name: customer_count
-        type: count_distinct
+        type: count_distinct_approx
         sql: customer_id
-        description: "CM001 - Total unique customers"
+        description: "CM001 - Total unique customers (HyperLogLog ~2% accuracy)"
 
       # CM002: Total Customer LTV
       - name: total_ltv
@@ -106,21 +106,21 @@ cubes:
         description: "Average orders per customer"
 
     pre_aggregations:
-      # Pre-agg 3: Customer grain (one row per customer for exact counts)
+      # Pre-agg 3: Customer LTV analysis (uses count_distinct_approx for customer_count)
       - name: customer_ltv
         type: rollup
         dimensions:
-          - customer_id
           - customer_since_pst
           - customer_segment
           - value_segment
           - default_country
         measures:
+          - customer_count
           - total_ltv
           - avg_ltv
           - total_orders
         time_dimension: customer_since_pst
-        granularity: day
+        granularity: month
         partition_granularity: year
         refresh_key:
           every: 6 hours

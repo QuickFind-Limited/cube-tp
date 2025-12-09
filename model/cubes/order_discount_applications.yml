@@ -56,12 +56,27 @@ cubes:
 
       # Orders with discounts
       - name: discounted_order_count
-        type: count_distinct
+        type: count_distinct_approx
         sql: order_id
-        description: "Count of orders with discounts applied"
+        description: "Count of orders with discounts applied (HyperLogLog ~2% accuracy)"
 
       # Average discount percentage
       - name: avg_discount_percentage
         type: avg
         sql: discount_percentage
         description: "Average discount percentage"
+
+    pre_aggregations:
+      # Pre-agg 8: Discount analysis
+      - name: discounts_by_product
+        type: rollup
+        dimensions:
+          - product_title
+        measures:
+          - total_discount_amount
+          - unit_discount_total
+          - line_count
+          - discounted_order_count
+          - avg_discount_percentage
+        refresh_key:
+          every: 1 hour

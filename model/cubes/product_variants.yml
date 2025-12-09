@@ -66,9 +66,9 @@ cubes:
     measures:
       # Variant count
       - name: variant_count
-        type: count_distinct
+        type: count_distinct_approx
         sql: variant_id
-        description: "Total unique variants (SKUs)"
+        description: "Total unique variants (SKUs) (HyperLogLog ~2% accuracy)"
 
       # Average price
       - name: avg_price
@@ -103,3 +103,19 @@ cubes:
         type: sum
         sql: inventory_quantity
         description: "Total inventory across variants"
+
+    pre_aggregations:
+      # Pre-agg 9: Variant pricing and availability
+      - name: variant_summary
+        type: rollup
+        dimensions:
+          - product_id
+        measures:
+          - variant_count
+          - avg_price
+          - discount_amount
+          - avg_discount_percentage
+          - on_sale_count
+          - total_inventory
+        refresh_key:
+          every: 2 hours

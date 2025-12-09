@@ -50,9 +50,9 @@ cubes:
     measures:
       # RET001: Refund Count
       - name: refund_count
-        type: count_distinct
+        type: count_distinct_approx
         sql: refund_id
-        description: "RET001 - Total refunds"
+        description: "RET001 - Total refunds (HyperLogLog ~2% accuracy)"
 
       # RET003: Total Refunded Amount
       - name: total_refunded
@@ -74,20 +74,21 @@ cubes:
 
       # Order count (distinct orders with refunds)
       - name: refunded_order_count
-        type: count_distinct
+        type: count_distinct_approx
         sql: order_id
         description: "Count of orders with refunds"
 
     pre_aggregations:
-      # Pre-agg 6: Refund grain (one row per refund for exact counts)
-      - name: refunds_by_refund
+      # Pre-agg 6: Refund analysis (uses count_distinct_approx for refund_count)
+      - name: refunds_daily
         type: rollup
         dimensions:
-          - refund_id
           - refund_date_only_pst
         measures:
+          - refund_count
           - total_refunded
           - avg_days_to_refund
+          - refunded_order_count
         time_dimension: refund_date_only_pst
         granularity: day
         partition_granularity: month
