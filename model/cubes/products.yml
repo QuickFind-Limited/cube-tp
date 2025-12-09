@@ -110,15 +110,15 @@ cubes:
         description: "LIFE004 - Count of inactive products"
 
     pre_aggregations:
-      # Pre-agg 4: Product performance
+      # Pre-agg 4: Product grain (one row per product for exact counts)
       - name: product_summary
         type: rollup
         dimensions:
+          - product_id
           - product_type
           - vendor
           - status
         measures:
-          - product_count
           - total_inventory
           - out_of_stock_count
           - low_stock_count

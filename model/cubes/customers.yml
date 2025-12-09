@@ -106,21 +106,21 @@ cubes:
         description: "Average orders per customer"
 
     pre_aggregations:
-      # Pre-agg 3: Customer LTV analysis
+      # Pre-agg 3: Customer grain (one row per customer for exact counts)
       - name: customer_ltv
         type: rollup
         dimensions:
+          - customer_id
           - customer_since_pst
           - customer_segment
           - value_segment
           - default_country
         measures:
-          - customer_count
           - total_ltv
           - avg_ltv
           - total_orders
         time_dimension: customer_since_pst
-        granularity: month
+        granularity: day
         partition_granularity: year
         refresh_key:
           every: 6 hours

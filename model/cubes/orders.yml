@@ -182,16 +182,16 @@ cubes:
         description: "Total payment transactions (pre-aggregated)"
 
     pre_aggregations:
-      # Pre-agg 1: Daily orders summary
-      - name: orders_daily
+      # Pre-agg 1: Order grain (one row per order for exact counts)
+      - name: orders_by_order
         type: rollup
         dimensions:
+          - order_id
           - order_date_pst
           - financial_status
           - fulfillment_status
           - shipping_country
         measures:
-          - order_count
           - total_revenue
           - gross_revenue
           - total_refunded

@@ -79,16 +79,15 @@ cubes:
         description: "Count of orders with refunds"
 
     pre_aggregations:
-      # Pre-agg 6: Refund analysis
-      - name: refunds_daily
+      # Pre-agg 6: Refund grain (one row per refund for exact counts)
+      - name: refunds_by_refund
         type: rollup
         dimensions:
+          - refund_id
           - refund_date_only_pst
         measures:
-          - refund_count
           - total_refunded
           - avg_days_to_refund
-          - refunded_order_count
         time_dimension: refund_date_only_pst
         granularity: day
         partition_granularity: month

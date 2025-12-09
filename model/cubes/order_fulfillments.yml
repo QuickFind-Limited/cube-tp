@@ -97,15 +97,15 @@ cubes:
         description: "Count of fulfilled orders"
 
     pre_aggregations:
-      # Pre-agg 7: Fulfillment performance
-      - name: fulfillments_daily
+      # Pre-agg 7: Fulfillment grain (one row per fulfillment for exact counts)
+      - name: fulfillments_by_fulfillment
         type: rollup
         dimensions:
+          - fulfillment_id
           - fulfillment_date_pst
           - fulfillment_status
           - carrier
         measures:
-          - fulfillment_count
           - total_quantity
           - avg_hours_to_fulfill
           - on_time_count
