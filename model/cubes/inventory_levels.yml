@@ -1,6 +1,6 @@
 cubes:
   - name: inventory_levels
-    sql_table: magical-desktop.shopify.inventory_levels_with_pst
+    sql_table: "`magical-desktop.shopify.inventory_levels_with_pst`"
 
     description: Inventory stock levels by location and variant
 

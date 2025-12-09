@@ -1,6 +1,6 @@
 cubes:
   - name: order_refunds
-    sql_table: magical-desktop.shopify.order_refunds_with_pst
+    sql_table: "`magical-desktop.shopify.order_refunds_with_pst`"
 
     description: Refund transactions and return metrics
 

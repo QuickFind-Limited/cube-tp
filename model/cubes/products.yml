@@ -1,6 +1,6 @@
 cubes:
   - name: products
-    sql_table: magical-desktop.shopify.products_flat_with_pst
+    sql_table: "`magical-desktop.shopify.products_flat_with_pst`"
 
     description: Product master with inventory and lifecycle metrics
 

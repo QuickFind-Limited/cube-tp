@@ -1,6 +1,6 @@
 cubes:
   - name: orders
-    sql_table: magical-desktop.shopify.orders_flat_with_pst
+    sql_table: "`magical-desktop.shopify.orders_flat_with_pst`"
 
     description: Order header metrics - one row per order
 

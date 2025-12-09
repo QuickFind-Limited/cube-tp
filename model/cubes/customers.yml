@@ -1,6 +1,6 @@
 cubes:
   - name: customers
-    sql_table: magical-desktop.shopify.customers_flat_with_pst
+    sql_table: "`magical-desktop.shopify.customers_flat_with_pst`"
 
     description: Customer master with lifetime value metrics
 

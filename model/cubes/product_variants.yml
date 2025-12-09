@@ -1,6 +1,6 @@
 cubes:
   - name: product_variants
-    sql_table: magical-desktop.shopify.product_variants_with_pst
+    sql_table: "`magical-desktop.shopify.product_variants_with_pst`"
 
     description: Product variant (SKU) level details
 

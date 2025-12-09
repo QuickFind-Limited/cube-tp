@@ -1,6 +1,6 @@
 cubes:
   - name: order_discount_applications
-    sql_table: magical-desktop.shopify.order_discount_applications_with_pst
+    sql_table: "`magical-desktop.shopify.order_discount_applications_with_pst`"
 
     description: Discount code usage and promotion effectiveness
 

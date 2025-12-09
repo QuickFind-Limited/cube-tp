@@ -1,6 +1,6 @@
 cubes:
   - name: order_fulfillments
-    sql_table: magical-desktop.shopify.order_fulfillments_with_pst
+    sql_table: "`magical-desktop.shopify.order_fulfillments_with_pst`"
 
     description: Fulfillment tracking and shipping metrics
 
