@@ -201,8 +201,8 @@ cubes:
         refresh_key:
           every: 1 hour
 
-      # Pre-agg 8: Transaction-grain for exact counting
-      - name: order_grain_exact
+      # Pre-agg 8: Order-grain rollup for order-level aggregations
+      - name: orders_rollup
         type: rollup
         dimensions:
           - order_id
