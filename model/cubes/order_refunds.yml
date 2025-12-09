@@ -29,7 +29,7 @@ cubes:
         description: "Refund date in PST"
 
       - name: refund_date_only_pst
-        sql: refund_date_only_pst
+        sql: CAST(refund_date_only_pst AS TIMESTAMP)
         type: time
         description: "Refund date (date part) in PST"
 

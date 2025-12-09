@@ -29,7 +29,7 @@ cubes:
         description: "Fulfillment timestamp in PST"
 
       - name: fulfillment_date_pst
-        sql: fulfillment_date_pst
+        sql: CAST(fulfillment_date_pst AS TIMESTAMP)
         type: time
         description: "Fulfillment date in PST"
 
