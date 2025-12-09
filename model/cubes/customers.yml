@@ -121,7 +121,6 @@ cubes:
           - total_orders
         time_dimension: customer_since_pst
         granularity: month
-        build_range_start: "2024-01-01"
         partition_granularity: year
         refresh_key:
           every: 6 hours

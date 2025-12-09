@@ -197,7 +197,6 @@ cubes:
           - discount_amount
         time_dimension: order_date_pst
         granularity: day
-        build_range_start: "2024-01-01"
         partition_granularity: month
         refresh_key:
           every: 1 hour
@@ -215,7 +214,6 @@ cubes:
           - line_count
         time_dimension: order_date_pst
         granularity: day
-        build_range_start: "2024-01-01"
         partition_granularity: month
         refresh_key:
           every: 1 hour

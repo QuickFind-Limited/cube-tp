@@ -91,7 +91,6 @@ cubes:
           - refunded_order_count
         time_dimension: refund_date_only_pst
         granularity: day
-        build_range_start: "2024-01-01"
         partition_granularity: month
         refresh_key:
           every: 1 hour

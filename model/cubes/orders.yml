@@ -199,6 +199,5 @@ cubes:
         time_dimension: order_date_pst
         granularity: day
         partition_granularity: month
-        build_range_start: "2024-01-01"
         refresh_key:
           every: 1 hour
