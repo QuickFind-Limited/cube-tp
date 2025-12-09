@@ -15,9 +15,8 @@ cubes:
         li.line_discount_amount,
         li.original_line_total,
         li.discounted_unit_price,
-        li.cost,
         li.is_gift_card,
-        li.fulfillable,
+        li.fulfillable_quantity,
         li.requires_shipping,
         o.order_date_pst,
         o.order_month_pst,
@@ -115,9 +114,9 @@ cubes:
         type: boolean
         description: "Filter is_gift_card=false for product-only revenue"
 
-      - name: fulfillable
-        sql: fulfillable
-        type: boolean
+      - name: fulfillable_quantity
+        sql: fulfillable_quantity
+        type: number
 
       - name: requires_shipping
         sql: requires_shipping
@@ -178,21 +177,7 @@ cubes:
         sql: discounted_unit_price
         description: "PM003 - Average selling price per unit"
 
-      # MM001: Margin (requires cost data if available)
-      - name: total_cost
-        type: sum
-        sql: COALESCE(cost, 0)
-        description: "Total product cost"
-
-      - name: gross_margin
-        type: number
-        sql: "{total_revenue} - {total_cost}"
-        description: "MM001 - Gross margin dollars"
-
-      - name: margin_percentage
-        type: number
-        sql: "CASE WHEN {total_revenue} > 0 THEN ({total_revenue} - {total_cost}) / {total_revenue} * 100 ELSE 0 END"
-        description: "Gross margin percentage"
+      # Note: MM001 margin metrics not available - no cost field in BigQuery view
 
     pre_aggregations:
       # Pre-agg 2: Product performance rollup
