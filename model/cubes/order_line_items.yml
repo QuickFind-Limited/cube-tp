@@ -199,7 +199,7 @@ cubes:
         granularity: day
         partition_granularity: month
         refresh_key:
-          every: 1 hour
+          every: 365 days
 
       # Pre-agg 8: Order-grain rollup for order-level aggregations
       - name: orders_rollup
@@ -216,4 +216,4 @@ cubes:
         granularity: day
         partition_granularity: month
         refresh_key:
-          every: 1 hour
+          every: 365 days

@@ -92,4 +92,4 @@ cubes:
         granularity: day
         partition_granularity: month
         refresh_key:
-          every: 1 hour
+          every: 365 days

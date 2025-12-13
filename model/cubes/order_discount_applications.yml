@@ -79,4 +79,4 @@ cubes:
           - discounted_order_count
           - avg_discount_percentage
         refresh_key:
-          every: 1 hour
+          every: 365 days

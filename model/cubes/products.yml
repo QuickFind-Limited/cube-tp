@@ -124,4 +124,4 @@ cubes:
           - low_stock_count
           - active_count
         refresh_key:
-          every: 2 hours
+          every: 365 days

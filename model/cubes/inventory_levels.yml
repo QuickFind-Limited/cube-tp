@@ -119,4 +119,4 @@ cubes:
           - in_stock_count
           - out_of_stock_count
         refresh_key:
-          every: 30 minutes
+          every: 365 days
