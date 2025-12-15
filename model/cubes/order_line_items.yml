@@ -24,6 +24,7 @@ cubes:
         o.order_month,
         o.customer_id,
         o.shipping_country,
+        o.shipping_city,
         o.shipping_province,
         o.financial_status,
         o.fulfillment_status
@@ -95,6 +96,10 @@ cubes:
 
       - name: shipping_country
         sql: shipping_country
+        type: string
+
+      - name: shipping_city
+        sql: shipping_city
         type: string
 
       - name: shipping_province
@@ -180,13 +185,14 @@ cubes:
       # Note: MM001 margin metrics not available - no cost field in BigQuery view
 
     pre_aggregations:
-      # Pre-agg 1: Daily revenue by country (for country-level analysis)
+      # Pre-agg 1: Daily revenue by country and city (for geographic analysis)
       - name: daily_revenue_by_country
         type: rollup
         scheduled_refresh: false
         dimensions:
           - order_date_pst
           - shipping_country
+          - shipping_city
         measures:
           - total_revenue
           - order_count
