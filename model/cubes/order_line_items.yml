@@ -198,7 +198,6 @@ cubes:
         time_dimension: order_date_pst
         granularity: day
         partition_granularity: month
-        update_window: 7 days
         refresh_key:
           every: 1 day
 
