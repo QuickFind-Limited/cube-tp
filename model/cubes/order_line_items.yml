@@ -180,6 +180,21 @@ cubes:
       # Note: MM001 margin metrics not available - no cost field in BigQuery view
 
     pre_aggregations:
+      # Pre-agg 1: Daily revenue by country (for country-level analysis)
+      - name: daily_revenue_by_country
+        type: rollup
+        dimensions:
+          - order_date_pst
+          - shipping_country
+        measures:
+          - total_revenue
+          - order_count
+        time_dimension: order_date_pst
+        granularity: day
+        partition_granularity: month
+        refresh_key:
+          every: 365 days
+
       # Pre-agg 2: Product performance rollup
       - name: product_daily
         type: rollup
