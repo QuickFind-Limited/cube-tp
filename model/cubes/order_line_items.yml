@@ -186,7 +186,6 @@ cubes:
 
     pre_aggregations:
       # Pre-agg 1: Daily revenue by country and city (for geographic analysis)
-      # Limited to last 2 years to avoid rate limits during build
       - name: daily_revenue_by_country
         type: rollup
         dimensions:
@@ -199,10 +198,6 @@ cubes:
         time_dimension: order_date_pst
         granularity: day
         partition_granularity: month
-        build_range_start:
-          sql: SELECT DATE_SUB(CURRENT_DATE(), INTERVAL 2 YEAR)
-        build_range_end:
-          sql: SELECT CURRENT_DATE()
         refresh_key:
           every: 1 day
 
