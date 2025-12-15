@@ -183,6 +183,7 @@ cubes:
       # Pre-agg 1: Daily revenue by country (for country-level analysis)
       - name: daily_revenue_by_country
         type: rollup
+        scheduled_refresh: false
         dimensions:
           - order_date_pst
           - shipping_country
