@@ -108,6 +108,7 @@ cubes:
     pre_aggregations:
       # Pre-agg 3: Customer LTV analysis (uses count_distinct_approx for customer_count)
       - name: customer_ltv
+        scheduledRefresh: true
         type: rollup
         dimensions:
           - customer_since_pst
@@ -122,4 +123,4 @@ cubes:
         granularity: month
         partition_granularity: year
         refresh_key:
-          every: 365 days
+          every: "0 10 * * *"

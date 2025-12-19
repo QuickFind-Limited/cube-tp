@@ -107,6 +107,7 @@ cubes:
     pre_aggregations:
       # Pre-agg 5: Inventory snapshot
       - name: inventory_snapshot
+        scheduledRefresh: true
         type: rollup
         dimensions:
           - location_id
@@ -119,4 +120,4 @@ cubes:
           - in_stock_count
           - out_of_stock_count
         refresh_key:
-          every: 365 days
+          every: "0 10 * * *"

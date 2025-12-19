@@ -99,6 +99,7 @@ cubes:
     pre_aggregations:
       # Pre-agg 7: Fulfillment performance (uses count_distinct_approx for fulfillment_count)
       - name: fulfillments_daily
+        scheduledRefresh: true
         type: rollup
         dimensions:
           - fulfillment_date_pst
@@ -113,4 +114,4 @@ cubes:
         granularity: day
         partition_granularity: month
         refresh_key:
-          every: 365 days
+          every: "0 10 * * *"

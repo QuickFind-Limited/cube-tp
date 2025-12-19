@@ -199,7 +199,7 @@ cubes:
         granularity: day
         partition_granularity: month
         refresh_key:
-          every: 1 day
+          every: "0 10 * * *"
 
       # Pre-agg 2: Product performance rollup
       - name: product_daily
@@ -220,7 +220,7 @@ cubes:
         granularity: day
         partition_granularity: month
         refresh_key:
-          every: 365 days
+          every: "0 10 * * *"
 
       # Pre-agg 8: Order-grain rollup for order-level aggregations
       - name: orders_rollup
@@ -237,4 +237,4 @@ cubes:
         granularity: day
         partition_granularity: month
         refresh_key:
-          every: 365 days
+          every: "0 10 * * *"

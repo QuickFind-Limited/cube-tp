@@ -118,4 +118,4 @@ cubes:
           - on_sale_count
           - total_inventory
         refresh_key:
-          every: 365 days
+          every: "0 10 * * *"
